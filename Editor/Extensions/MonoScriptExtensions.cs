@@ -22,39 +22,40 @@
         /// <param name="className">A specific class name to search for.</param>
         /// <returns>The <see cref="Type"/> of the class implemented by this script or <see langword="null"/>,
         /// if the type was not found.</returns>
-        [PublicAPI, CanBeNull] public static Type GetClassType(this MonoScript script, string className = null)
-        {
-            Type simpleType = script.GetClass();
-            if (simpleType != null)
-                return simpleType;
+		[PublicAPI, CanBeNull] public static Type GetClassType(this MonoScript script, Type _type, string className = null)
+		{
+			Type simpleType = script.GetClass();
+			if (simpleType != null)
+				return simpleType;
 
-            string foundClassName = string.IsNullOrEmpty(className) ? GetFirstClassFromText(script.text) : GetFirstClassWithName(script.text, className);
+			string foundClassName = string.IsNullOrEmpty(className) ? GetFirstClassFromText(script.text) : GetFirstClassWithName(script.text, className);
 
-            if (string.IsNullOrEmpty(foundClassName))
-                return null;
+			if (string.IsNullOrEmpty(foundClassName))
+				return null;
 
-            string assemblyName = script.GetAssemblyName();
-            Assembly assembly;
+			//string assemblyName = script.GetAssemblyName();
+			string assemblyName = _type.GetShortAssemblyName();
+		Assembly assembly;
 
-            try
-            {
-                assembly = Assembly.Load(assemblyName);
-            }
-            catch (Exception e)
-            {
-                // Whatever caused this exception, the type cannot be loaded, so disregard it as null.
-                if (e is FileNotFoundException || e is FileLoadException)
-                    return null;
+			try
+			{
+				assembly = Assembly.Load(assemblyName);
+			}
+			catch (Exception e)
+			{
+				// Whatever caused this exception, the type cannot be loaded, so disregard it as null.
+				if (e is FileNotFoundException || e is FileLoadException)
+					return null;
 
-                throw;
-            }
+				throw;
+			}
 
-            string namespaceName = script.GetNamespaceName();
-            string fullTypeName = namespaceName == string.Empty ? foundClassName : $"{namespaceName}.{foundClassName}";
+			string namespaceName = script.GetNamespaceName();
+			string fullTypeName = namespaceName == string.Empty ? foundClassName : $"{namespaceName}.{foundClassName}";
 
-            Type type = assembly.GetType(fullTypeName);
-            return type;
-        }
+			Type type = assembly.GetType(fullTypeName);
+			return type;
+		}
 
         private static string GetFirstClassFromText(string text)
         {
@@ -89,9 +90,13 @@
         /// </returns>
         [PublicAPI, NotNull] public static string GetAssemblyName(this MonoScript script)
         {
-            string assemblyName = script.Internal_GetAssemblyName();
-            int lastDotIndex = assemblyName.LastIndexOf('.');
-            return lastDotIndex == -1 ? string.Empty : assemblyName.Substring(0, lastDotIndex);
+			string assemblyName = script.Internal_GetAssemblyName();
+			int lastDotIndex = assemblyName.LastIndexOf('.');
+			if(assemblyName == null || assemblyName == string.Empty)
+			{
+				return string.Empty;
+			}
+			return lastDotIndex == -1 ? assemblyName : assemblyName.Substring(0, lastDotIndex);
         }
 
         private static string GetNamespaceName(this MonoScript asset)

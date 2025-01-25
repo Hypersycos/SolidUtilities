@@ -17,34 +17,34 @@
         /// <returns><c>true</c> if the asset with the specified type was found.</returns>
         [PublicAPI]
         [ContractAnnotation("=> true, GUID: notnull; => false, GUID: null")]
-        public static bool GetAssetDetails(Type type, [CanBeNull] out string GUID, out MonoScript monoScript)
-        {
-            GUID = string.Empty;
-            monoScript = null;
+		public static bool GetAssetDetails(Type type, [CanBeNull] out string GUID, out MonoScript monoScript)
+		{
+			GUID = string.Empty;
+			monoScript = null;
 
-            if (type == null)
-                return false;
+			if (type == null)
+				return false;
 
-            if (type.IsGenericType)
-                type = type.GetGenericTypeDefinition();
+			if (type.IsGenericType)
+				type = type.GetGenericTypeDefinition();
 
-            string typeNameWithoutSuffix = type.Name.StripGenericSuffix();
+			string typeNameWithoutSuffix = type.Name.StripGenericSuffix();
 
-            foreach (string guid in AssetDatabase.FindAssets($"t:MonoScript {typeNameWithoutSuffix}"))
-            {
-                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-                var asset = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
+			foreach (string guid in AssetDatabase.FindAssets($"t:MonoScript {typeNameWithoutSuffix}"))
+			{
+				string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+				var asset = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
 
-                if (asset is null || asset.GetClassType(typeNameWithoutSuffix) != type)
-                    continue;
+				if (asset == null || asset.GetClassType(type, typeNameWithoutSuffix) != type)
+					continue;
 
-                GUID = guid;
-                monoScript = asset;
-                return true;
-            }
+				GUID = guid;
+				monoScript = asset;
+				return true;
+			}
 
-            return false;
-        }
+			return false;
+		}
 
         [NotNull]
         public static string GetClassGUID(Type type) =>

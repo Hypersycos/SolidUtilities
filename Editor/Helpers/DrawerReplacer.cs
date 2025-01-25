@@ -28,7 +28,14 @@
         public static void ReplaceDefaultDrawer<TObject, TDrawer>()
             where TDrawer : PropertyDrawer
         {
-            UnityEditorInternals.DrawerReplacer.ReplaceDefaultDrawer<TObject, TDrawer>();
+            try
+            {
+                UnityEditorInternals.DrawerReplacer.ReplaceDefaultDrawer<TObject, TDrawer>();
+            }
+            catch(System.TypeLoadException e)
+            {
+                //UnityEngine.Debug.LogException(e);
+            }
         }
     }
 }

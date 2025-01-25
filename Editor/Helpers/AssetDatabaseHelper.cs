@@ -15,6 +15,7 @@
         [PublicAPI, CanBeNull, Pure]
         public static Type GetTypeFromGUID(string guid)
         {
+			Type classType = AssetDatabase.GetMainAssetTypeFromGUID(new GUID(guid));
             string assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
             if (string.IsNullOrEmpty(assetPath))
@@ -22,7 +23,7 @@
 
             var script = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
 
-            return script == null ? null : script.GetClassType();
+            return script == null ? null : script.GetClassType(classType);
         }
         
         /// <summary>
